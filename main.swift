@@ -6,7 +6,7 @@ import Foundation
 ######################################################
 */
 func dotProduct(_ vectorA: [Float], _ vectorB: [Float]) -> Float {
-  guard vectorA.count == vectorB.count else { exit(0) }  // should always have the same length
+  guard vectorA.count == vectorB.count else { exit(0) }  // should always have the same length else throw error 
   return zip(vectorA, vectorB).map(*).reduce(0, +)
 }
 func euclideanNorm(array: [Float]) -> Float {
@@ -80,8 +80,7 @@ func stopping_func(x: [Float]) -> Float {
   return euclideanNorm(array: function_grad(x: x))
 }
 
-func part1B() {
-  // Part 1B Imple
+func part1B() { // Part 1B Imple
   let initialCond: [Float] = [12.0, 14.0]
   let epsilon: Float = 0.001
   let alpha: Float = 0.3
