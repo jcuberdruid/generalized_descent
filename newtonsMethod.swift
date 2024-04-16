@@ -1,7 +1,7 @@
 import Foundation
 
 //function param
-let gamma:Float = 2.0;
+let gamma:Float = 8.0;
 
 /*
 ######################################################
@@ -63,12 +63,12 @@ func genDescent(
   var step: Float = 1  //initial
   var x = initialPoint
   var direction = g(x).map { -$0 }
-  var maxCount = 10000
+  var maxCount = 100
 
 
 //instead of epsilon use the newton decrement as the stopping condition
 
-  while T(x) > t {  //epsilon
+  while abs(T(x)) > t {  //epsilon
     while true {  //line backtracking
       if f(zip(x, direction).map { $0 + ($1 * step) }) <= f(x) + alpha * step
         * dotProduct(direction.map { -$0 }, direction)
@@ -79,16 +79,12 @@ func genDescent(
       step = step * beta
       print("backtracking step: ", step)
     }
+    print("Direction", direction)
     x = zip(x, direction).map { $0 + ($1 * step) }
     iter_points.append(x)
     iter_evaluated_points.append(f(x))
 
-    //direction not g(x) (which is currently the gradient) instead use the newton step
-    //so the direction can be replaced with a function that involves the hessian
-    //question: does the hessian need to be recalculated each time
-        //though-> no since we just need to substitute x for x_k
     direction = g(x).map { -$0 }
-
     if maxCount > 0 {
       print("Max count not met")
       maxCount = maxCount - 1
@@ -123,38 +119,43 @@ func inverse_2_2_mat(mat_og: [[Float]]) -> [[Float]]{
     mat[1][1] = mat[1][1] * -1
     return mat.map { $0.map{ $0 / const } }
 }
-func newtons_step(x: [Float]) -> [Float] {
-    let grad = function_grad(x: x)
-    let hessian = function_hessian(x: x)
-    let inverse_hessian = inverse_2_2_mat(mat_og: hessian) 
-    
-    let grad_x_hessian = matrixMultiply(inverse_hessian, [[grad[0]],[grad[1]]])
-
-    print(grad_x_hessian)    
- 
-    //x - (∇^(2)f(x)^(-1))*(∇f(x)^(-1)) 
-    guard let grad_x_hessian = grad_x_hessian else {
-       print("bad grad x hessian")
-       exit(0) 
-    }
-
-    return [x[0]-grad_x_hessian[0][0], x[1]-grad_x_hessian[1][0]]
-    //return grad 
+func newtons_direction(x: [Float]) -> [Float] {
+    let gradient = [x[0], gamma * x[1]]
+    let direction = [gradient[0], 0.5 * gradient[1]]
+    print("Direction from func", direction)    
+    return direction
 }
+
 func stopping_func(x: [Float]) -> Float { // will now be newtons decrement
-
-  return euclideanNorm(array: function_grad(x: x))
+  //(∇^(2)f(x)^(-1))*||(∇f(x))|| 
+  // or 
+  //(∇f(x)^T)*(∇^(2)f(x)^(-1))*(∇f(x)) 
+  let grad = function_grad(x: x)
+  let grad_transpose = [[grad[0], grad[1]]]
+  let hessian = function_hessian(x: x)
+  let inverse_hessian = inverse_2_2_mat(mat_og: hessian)
+  let first_product = matrixMultiply(inverse_hessian, [[grad[0]], [grad[1]]])
+  guard let first_product = first_product else {
+       print("bad grad transpose x hessian")
+       exit(0) 
+  }
+  let second_product = matrixMultiply(first_product, grad_transpose) 
+  guard let second_product = second_product else {
+       print("bad grad transpose x hessian product by grad")
+       exit(0) 
+  }
+  return second_product[0][0]
 }
 
-func part1B() { // Part 1B Imple
+func part1C() { // Part 1B Imple
   let initialCond: [Float] = [12.0, 14.0]
-  let epsilon: Float = 0.001
+  let epsilon: Float = 0.0001
   let alpha: Float = 0.3
   let beta: Float = 0.7
   let result = genDescent(
-    f: function, g: newtons_step, T: stopping_func, t: epsilon, initialPoint: initialCond,
+    f: function, g: newtons_direction, T: stopping_func, t: epsilon, initialPoint: initialCond,
     alpha: alpha, beta: beta)
   print(result)
 }
 
-part1B()
+part1C()

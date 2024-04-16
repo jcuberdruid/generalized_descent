@@ -36,18 +36,13 @@ func genDescent(
   var maxCount = 10000
 
   while T(x) > t {  //epsilon
-    var oldStep: Float = 0.0
     while true {  //line backtracking
       if f(zip(x, direction).map { $0 + ($1 * step) }) <= f(x) + alpha * step
         * dotProduct(direction.map { -$0 }, direction)
       {
         break
       }
-      if step - oldStep < 0.000001 {
-        print("backtrack stagnated")
-        break
-      }
-      oldStep = step
+      //oldStep = step
       step = step * beta
       print("backtracking step: ", step)
     }
@@ -71,7 +66,7 @@ func genDescent(
 ######################################################
 */
 func function(x: [Float]) -> Float {
-  return (0.5) * (pow(x[0], 2) + (2 * pow(x[1], 2)))
+  return (0.5) * (pow(x[0], 2) + (2 * pow(x[1], 2))) //hard coded gamma bad dude
 }
 func function_grad(x: [Float]) -> [Float] {
   return [x[0], 2 * x[1]]
