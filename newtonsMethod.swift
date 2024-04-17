@@ -1,7 +1,7 @@
 import Foundation
 
 //function param
-let gamma:Float = 8.0;
+let gamma:Float = 8;
 
 /*
 ######################################################
@@ -45,10 +45,29 @@ func matrixMultiply(_ matrixA: [[Float]], _ matrixB: [[Float]]) -> [[Float]]? {
     return resultMatrix
 }
 
+func writeToCsv(fileName: String, line: String) {
+    print(fileName)
+    if !FileManager.default.fileExists(atPath: fileName) {
+        FileManager.default.createFile(atPath: fileName, contents: nil)
+    }
+
+    if let fileHandle = FileHandle(forWritingAtPath: fileName) {
+        defer {
+            fileHandle.closeFile()
+        }
+        fileHandle.seekToEndOfFile()
+        if let data = line.data(using: .utf8) {
+            fileHandle.write(data)
+        }
+    } else {
+        exit(1)
+    }
+}
+
 
 /*
 ######################################################
-# Part 1 A
+# Part 1 C
 ######################################################
 */
 func genDescent(
@@ -104,7 +123,7 @@ func function(x: [Float]) -> Float {
 }
 func function_grad(x: [Float]) -> [Float] { 
   //x - (∇^(2)f(x)^(-1))*(∇f(x)^(-1)) 
-  return [x[0], 2 * x[1]]
+  return [x[0], gamma * x[1]]
 }
 func function_hessian(x: [Float]) -> [[Float]] {
     return [[1.0,0.0],[0.0,gamma]]
@@ -156,6 +175,15 @@ func part1C() { // Part 1B Imple
     f: function, g: newtons_direction, T: stopping_func, t: epsilon, initialPoint: initialCond,
     alpha: alpha, beta: beta)
   print(result)
+  let csv_file = "newton_method_results_gamma_\(gamma).csv"
+  let csv_row = "iteration, x, y, value\n"
+  writeToCsv(fileName: csv_file, line: csv_row)
+
+  for (n, line) in result.0.enumerated() {
+      let csv_row = "\(n),\(line[0]),\(line[1]),\(result.1[n])\n"
+      writeToCsv(fileName: csv_file, line: csv_row)
+  }
+
 }
 
 part1C()

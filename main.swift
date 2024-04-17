@@ -16,6 +16,25 @@ func euclideanNorm(array: [Float]) -> Float {
   return sqrt(sumOfSquares)
 }
 
+func writeToCsv(fileName: String, line: String) {
+    print(fileName)
+    if !FileManager.default.fileExists(atPath: fileName) {
+        FileManager.default.createFile(atPath: fileName, contents: nil)
+    }
+
+    if let fileHandle = FileHandle(forWritingAtPath: fileName) {
+        defer {
+            fileHandle.closeFile()
+        }
+        fileHandle.seekToEndOfFile()
+        if let data = line.data(using: .utf8) {
+            fileHandle.write(data)
+        }
+    } else {
+        exit(1)
+    }
+}
+
 /*
 ######################################################
 # Part 1 A
@@ -66,10 +85,10 @@ func genDescent(
 ######################################################
 */
 func function(x: [Float]) -> Float {
-  return (0.5) * (pow(x[0], 2) + (2 * pow(x[1], 2))) //hard coded gamma bad dude
+  return (0.5) * (pow(x[0], 2) + (2 * pow(x[1], 8))) //hard coded gamma bad dude
 }
 func function_grad(x: [Float]) -> [Float] {
-  return [x[0], 2 * x[1]]
+  return [x[0], 8 * x[1]]
 }
 func stopping_func(x: [Float]) -> Float {
   return euclideanNorm(array: function_grad(x: x))
@@ -84,6 +103,15 @@ func part1B() { // Part 1B Imple
     f: function, g: function_grad, T: stopping_func, t: epsilon, initialPoint: initialCond,
     alpha: alpha, beta: beta)
   print(result)
+ let csv_file = "gradient_descent__results_gamma_8.csv"
+  let csv_row = "iteration, x, y, value\n"
+  writeToCsv(fileName: csv_file, line: csv_row)
+
+  for (n, line) in result.0.enumerated() {
+      let csv_row = "\(n),\(line[0]),\(line[1]),\(result.1[n])\n"
+      writeToCsv(fileName: csv_file, line: csv_row)
+  }
+
 }
 
 part1B()
