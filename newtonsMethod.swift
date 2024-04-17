@@ -1,7 +1,7 @@
 import Foundation
 
 //function param
-let gamma:Float = 8;
+let gamma:Float = 2;
 
 /*
 ######################################################
@@ -83,6 +83,9 @@ func genDescent(
   var x = initialPoint
   var direction = g(x).map { -$0 }
   var maxCount = 100
+  iter_points.append(x)
+  iter_evaluated_points.append(f(x))
+
 
 
 //instead of epsilon use the newton decrement as the stopping condition

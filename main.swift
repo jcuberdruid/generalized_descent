@@ -53,6 +53,8 @@ func genDescent(
   var x = initialPoint
   var direction = g(x).map { -$0 }
   var maxCount = 10000
+  iter_points.append(x)
+  iter_evaluated_points.append(f(x))
 
   while T(x) > t {  //epsilon
     while true {  //line backtracking
@@ -84,11 +86,13 @@ func genDescent(
 # Part 1 B
 ######################################################
 */
+let gamma: Float = 2.0
+
 func function(x: [Float]) -> Float {
-  return (0.5) * (pow(x[0], 2) + (2 * pow(x[1], 8))) //hard coded gamma bad dude
+  return (0.5) * (pow(x[0], 2) + (gamma * pow(x[1], 2))) //hard coded gamma bad dude
 }
 func function_grad(x: [Float]) -> [Float] {
-  return [x[0], 8 * x[1]]
+  return [x[0], gamma * x[1]]
 }
 func stopping_func(x: [Float]) -> Float {
   return euclideanNorm(array: function_grad(x: x))
@@ -103,7 +107,7 @@ func part1B() { // Part 1B Imple
     f: function, g: function_grad, T: stopping_func, t: epsilon, initialPoint: initialCond,
     alpha: alpha, beta: beta)
   print(result)
- let csv_file = "gradient_descent__results_gamma_8.csv"
+ let csv_file = "gradient_descent__results_\(gamma).csv"
   let csv_row = "iteration, x, y, value\n"
   writeToCsv(fileName: csv_file, line: csv_row)
 
